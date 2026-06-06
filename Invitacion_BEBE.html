@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡Revelación de Bebé!</title>
+    <style>
+        :root {
+            --cafe-oscuro: #5C4033;
+            --cafe-medio: #8B5A2B;
+            --azul-oso: #7BAFD4;
+            --rosa-oso: #F4B8C8;
+        }
+
+        body, html {
+            margin: 0; padding: 0; min-height: 100vh;
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: #f4e7d3;
+            background-image: radial-gradient(#d6c2a5 2px, transparent 2px);
+            background-size: 25px 25px;
+            overflow-x: hidden;
+        }
+
+        /* ANIMACIÓN DE PULSO PARA EL BOTÓN */
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 4px 10px rgba(92, 64, 51, 0.4); }
+            50% { transform: scale(1.1); box-shadow: 0 8px 20px rgba(92, 64, 51, 0.6); }
+            100% { transform: scale(1); box-shadow: 0 4px 10px rgba(92, 64, 51, 0.4); }
+        }
+
+        .music-btn {
+            position: fixed; top: 15px; right: 15px;
+            background-color: var(--cafe-oscuro); color: white;
+            border: none; border-radius: 30px; padding: 12px 18px;
+            font-size: 14px; font-weight: bold; cursor: pointer;
+            z-index: 100; display: flex; align-items: center; gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .pulsing { animation: pulse 2s infinite; }
+
+        .floating-elements { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: hidden; }
+        .emoji-float { position: absolute; font-size: 24px; animation: floatUp linear infinite; opacity: 0.5; }
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            20% { opacity: 0.7; } 80% { opacity: 0.7; }
+            100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+        }
+
+        .container-wrapper { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; position: relative; z-index: 1; }
+        .card { background: rgba(255, 255, 255, 0.95); width: 100%; max-width: 380px; border-radius: 25px; padding: 30px 25px; box-shadow: 0 15px 35px rgba(92, 64, 51, 0.2); text-align: center; border: 3px solid #DEB887; box-sizing: border-box; margin-top: 40px; }
+        h1 { color: var(--cafe-oscuro); font-size: 26px; margin-bottom: 10px; }
+        p { color: var(--cafe-medio); font-size: 16px; line-height: 1.5; margin-bottom: 20px; }
+        .main-icon { font-size: 65px; margin: 0; animation: bounce 2s infinite ease-in-out; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+        .btn-vote { display: flex; align-items: center; justify-content: center; gap: 15px; width: 100%; padding: 16px; border-radius: 20px; font-size: 18px; font-weight: bold; cursor: pointer; border: 3px solid transparent; margin-bottom: 15px; }
+        .btn-boy { background-color: #f0f8ff; border-color: var(--azul-oso); color: var(--azul-oso); }
+        .btn-girl { background-color: #fff0f5; border-color: var(--rosa-oso); color: var(--rosa-oso); }
+
+        #results-section, #details-section { display: none; animation: fadeIn 0.8s ease forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        .bar-wrap { margin-bottom: 15px; text-align: left; }
+        .bar-label { font-weight: bold; display: flex; justify-content: space-between; margin-bottom: 5px; }
+        .bar-bg { width: 100%; background-color: #e0e0e0; border-radius: 10px; height: 25px; overflow: hidden; }
+        .bar-fill { height: 100%; width: 0%; transition: width 1.5s cubic-bezier(0.1, 0.7, 0.1, 1); display: flex; align-items: center; padding-left: 10px; color: white; font-weight: bold; font-size: 14px; }
+        .fill-boy { background-color: var(--azul-oso); }
+        .fill-girl { background-color: var(--rosa-oso); }
+
+        .info-box { background: #fffdf8; border: 2px dashed var(--cafe-medio); border-radius: 15px; padding: 15px; text-align: left; margin-top: 20px; }
+        .map-btn { background-color: var(--cafe-medio); color: white; text-decoration: none; display: block; padding: 15px; border-radius: 25px; font-weight: bold; font-size: 16px; margin-top: 20px; }
+        .whatsapp-btn { background-color: #25D366; color: white; text-decoration: none; display: block; padding: 15px; border-radius: 25px; font-weight: bold; font-size: 16px; margin-top: 15px; }
+    </style>
+</head>
+<body>
+
+    <audio id="bg-music" loop>
+        <source src="https://files.catbox.moe/ahx2y9.mp3" type="audio/mpeg">
+    </audio>
+
+    <button class="music-btn pulsing" id="music-btn" onclick="toggleMusic()">
+        🔈 Toca para música
+    </button>
+
+    <div class="floating-elements" id="floater-container"></div>
+
+    <div class="container-wrapper">
+        <div class="card">
+            <div class="main-icon">🧸</div>
+            <h1>¿Niño o Niña?</h1>
+            
+            <div id="voting-section">
+                <p>¡Hay secretos que el alma guarda con ternura y este es el más hermoso!</p>
+                <p>¿Qué team eres?</p>
+                <button class="btn-vote btn-boy" onclick="castVote('boy')">💙 TEAM OSITO</button>
+                <button class="btn-vote btn-girl" onclick="castVote('girl')">💖 TEAM OSITA</button>
+            </div>
+
+            <div id="results-section">
+                <div class="bar-wrap">
+                    <div class="bar-label" style="color: var(--azul-oso);"><span>Osito 💙</span> <span id="count-boy">0</span></div>
+                    <div class="bar-bg"><div class="bar-fill fill-boy" id="bar-boy"></div></div>
+                </div>
+                <div class="bar-wrap">
+                    <div class="bar-label" style="color: var(--rosa-oso);"><span>Osita 💖</span> <span id="count-girl">0</span></div>
+                    <div class="bar-bg"><div class="bar-fill fill-girl" id="bar-girl"></div></div>
+                </div>
+                <h3 style="color: var(--cafe-oscuro); text-align: center;">Briana, Jhona & Ailencita</h3>
+                <p>¡Te hemos elegido como parte importante de nuestra familia y queremos que seas uno de los primeros en saber que será bebé!</p>
+                <h4 style="color: var(--cafe-oscuro); text-align: center;">¡Acompáñanos a descubrirlo!</h4>
+            </div>
+
+            <div id="details-section">
+                <div class="info-box">
+                    <p>📅 <strong>Fecha:</strong> Sábado, 06 de Junio</p>
+                    <p>⏰ <strong>Hora:</strong> 5:00 PM</p>
+                    <p>📍 <strong>Lugar:</strong> Seahorse, Telchac Puerto</p>
+                </div>
+                <a href="https://maps.google.com/?q=21.346254956888593, -89.23701442884837" target="_blank" class="map-btn">📍 Ver ubicación en el mapa</a>
+                <a href="https://wa.me/529911008003?text=¡Hola!,Confirmo%20mi%20asistencia%20para%20conocer%20que%20será%20Bebé!" target="_blank" class="whatsapp-btn">✅ Confirmar por WhatsApp</a>
+                <p style="margin-top: 20px; font-size: 14px;">Desde el vientre de mi madre, tú eres mi Dios. Salmos 22:10</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isPlaying = false;
+        const myAudio = document.getElementById("bg-music");
+        const musicBtn = document.getElementById("music-btn");
+
+        function toggleMusic() {
+            musicBtn.classList.remove('pulsing');
+            if (isPlaying) {
+                myAudio.pause();
+                musicBtn.innerHTML = "🔈 Toca para música";
+            } else {
+                myAudio.play();
+                musicBtn.innerHTML = "🔊 Pausar Música";
+            }
+            isPlaying = !isPlaying;
+        }
+
+        const floaterContainer = document.getElementById('floater-container');
+        const emojis = ['✨', '🍂', '🤍', '🍯'];
+        for(let i = 0; i < 15; i++) {
+            let el = document.createElement('div');
+            el.className = 'emoji-float';
+            el.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+            el.style.left = Math.random() * 100 + 'vw';
+            el.style.animationDuration = (Math.random() * 5 + 5) + 's';
+            el.style.animationDelay = (Math.random() * 5) + 's';
+            floaterContainer.appendChild(el);
+        }
+
+        let votesBoy = 24; let votesGirl = 31;
+        function castVote(team) {
+            if(team === 'boy') votesBoy++; else votesGirl++;
+            document.getElementById('voting-section').style.display = 'none';
+            document.getElementById('results-section').style.display = 'block';
+            document.getElementById('details-section').style.display = 'block';
+            let total = votesBoy + votesGirl;
+            let pctBoy = Math.round((votesBoy / total) * 100);
+            let pctGirl = Math.round((votesGirl / total) * 100);
+            document.getElementById('count-boy').innerText = votesBoy + ' votos';
+            document.getElementById('count-girl').innerText = votesGirl + ' votos';
+            setTimeout(() => {
+                document.getElementById('bar-boy').style.width = pctBoy + '%'; document.getElementById('bar-boy').innerText = pctBoy + '%';
+                document.getElementById('bar-girl').style.width = pctGirl + '%'; document.getElementById('bar-girl').innerText = pctGirl + '%';
+            }, 50);
+        }
+    </script>
+</body>
+</html>
